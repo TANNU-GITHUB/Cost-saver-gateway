@@ -1,0 +1,46 @@
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  gateway:
+    build: .
+    ports:
+      - "8801:8801"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      GATEWAY_PORT: 8801
+      MOCK_LLM: "true"
+      MOCK_JEV: "true"
+      JEV_ENABLED: "true"
+      ADMIN_SECRET: change-me-admin-secret
+    depends_on:
+      - redis
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - gateway
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  redis_data:

@@ -1,0 +1,68 @@
+{
+  "title": "AI Cost-Saver Gateway",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Cache hit rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(gateway_cache_hits_total[5m]) / (rate(gateway_cache_hits_total[5m]) + rate(gateway_cache_misses_total[5m]))",
+          "legendFormat": "hit rate"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cost saved (USD counter)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [{ "expr": "gateway_cost_saved_usd", "legendFormat": "usd" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency cache vs LLM",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(gateway_latency_cache_seconds_bucket[5m])) by (le))", "legendFormat": "cache p95" },
+        { "expr": "histogram_quantile(0.95, sum(rate(gateway_latency_llm_seconds_bucket[5m])) by (le))", "legendFormat": "llm p95" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Small vs large model usage",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "rate(gateway_routing_small_total[5m])", "legendFormat": "small" },
+        { "expr": "rate(gateway_routing_large_total[5m])", "legendFormat": "large" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jev routing decisions",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [{ "expr": "rate(gateway_jev_calls_total[5m])", "legendFormat": "{{kind}}" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jev confidence distribution",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [{ "expr": "rate(gateway_jev_confidence_bucket[5m])", "legendFormat": "le={{le}}" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jev fallback rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "targets": [{ "expr": "rate(gateway_jev_fallbacks_total[5m])", "legendFormat": "fallbacks" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "False cache hits (eval)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "targets": [{ "expr": "rate(gateway_false_cache_hits_total[5m])", "legendFormat": "false hits" }]
+    }
+  ]
+}
